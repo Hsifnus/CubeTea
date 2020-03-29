@@ -1,7 +1,11 @@
 altgraph==0.16.1
+dask==2.13.0
 future-fstrings==1.2.0
 macholib==1.13
 numpy==1.18.2
 PyInstaller==3.5
+PyOpenGL==3.1.5
+PyOpenGL-accelerate==3.1.5
 PySide2==5.14.1
 shiboken2==5.14.1
+toolz==0.10.0
