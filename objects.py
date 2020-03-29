@@ -1,6 +1,5 @@
 import numpy as np
 import math
-import json
 
 # Default camera plane x vector
 DEFAULT_X = np.array([1, 0, 0])
