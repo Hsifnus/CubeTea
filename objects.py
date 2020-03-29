@@ -19,7 +19,7 @@ COLOR_VARIANCE_FACTOR = 0.4
 SPECULAR_FACTOR = 0.4
 # Degrees per radian
 DPR = 180 / math.pi
-# Small constant
+# Small constant to prevent quaternions from zeroing out during object editing
 EPSILON = 1e-5
 
 min_raytrace_dist = 0

@@ -123,6 +123,19 @@ class CubeTeaRasterWidget(QtWidgets.QWidget):
         self.repaint = True
         self.update()
 
+class DoubleValidator(QtGui.QDoubleValidator):
+    def validate(self, arg__1, arg__2):
+        print(arg__1, arg__2)
+        if (len(arg__1) == 1 and arg__1 == '-'):
+            return QtGui.QValidator.Acceptable
+        elif (len(arg__1) > 1 and arg__1[0] == '-'):
+            judgment = super().validate(arg__1[1:], arg__2-1)
+            if (judgment[0] == QtGui.QValidator.Acceptable):
+                return (judgment[0], '-' + judgment[1], -judgment[2])
+            else:
+                return judgment
+        return super().validate(arg__1, arg__2)
+
 # Object editing component
 class CubeTeaInspectorWidget(QtWidgets.QWidget):
     def __init__(self, objs, idx):
@@ -140,7 +153,8 @@ class CubeTeaInspectorWidget(QtWidgets.QWidget):
         self.nameLabel = QtWidgets.QLabel(self.tr("&Name:"))
         self.nameLabel.setBuddy(self.nameLineEdit)
 
-        doubleValidator = QtGui.QDoubleValidator(bottom=sys.float_info.min, decimals=4, top=sys.float_info.max)
+        doubleValidator = DoubleValidator(bottom=sys.float_info.min, decimals=4, top=sys.float_info.max)
+        positiveValidator = QtGui.QDoubleValidator(bottom=0, decimals=4, top=sys.float_info.max)
 
         self.positionXEdit = QtWidgets.QLineEdit("0")
         self.positionXEdit.setValidator(doubleValidator)
@@ -226,17 +240,17 @@ class CubeTeaInspectorWidget(QtWidgets.QWidget):
         self.colorLabel.setBuddy(self.colorREdit)
 
         self.dimensionXEdit = QtWidgets.QLineEdit("1.0000")
-        self.dimensionXEdit.setValidator(doubleValidator)
+        self.dimensionXEdit.setValidator(positiveValidator)
         self.dimensionXEdit.setFixedWidth(80)
         self.dimensionXEdit.textChanged.connect(self.on_item_property_change("dims", 0))
 
         self.dimensionYEdit = QtWidgets.QLineEdit("1.0000")
-        self.dimensionYEdit.setValidator(doubleValidator)
+        self.dimensionYEdit.setValidator(positiveValidator)
         self.dimensionYEdit.setFixedWidth(80)
         self.dimensionYEdit.textChanged.connect(self.on_item_property_change("dims", 1))
 
         self.dimensionZEdit = QtWidgets.QLineEdit("1.0000")
-        self.dimensionZEdit.setValidator(doubleValidator)
+        self.dimensionZEdit.setValidator(positiveValidator)
         self.dimensionZEdit.setFixedWidth(80)
         self.dimensionZEdit.textChanged.connect(self.on_item_property_change("dims", 2))
 
@@ -244,7 +258,7 @@ class CubeTeaInspectorWidget(QtWidgets.QWidget):
         self.dimensionLabel.setBuddy(self.dimensionXEdit)
 
         self.radiusEdit = QtWidgets.QLineEdit("1.0000")
-        self.radiusEdit.setValidator(doubleValidator)
+        self.radiusEdit.setValidator(positiveValidator)
         self.radiusEdit.setFixedWidth(80)
         self.radiusEdit.textChanged.connect(self.on_item_property_change("rad"))
 
