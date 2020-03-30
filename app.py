@@ -34,7 +34,7 @@ class CubeTeaRasterWidget(QtWidgets.QWidget):
         self.camera = camera
         self.resize(SCALE_FACTOR * self.camera.vdims[0], SCALE_FACTOR * self.camera.vdims[1])
         self.show()
-        self.repaint = True
+        self.repaintRaytace = True
         self.cache = []
         self.mode = RasterMode.FRAME
         self.selectIdx = -1
@@ -62,7 +62,8 @@ class CubeTeaRasterWidget(QtWidgets.QWidget):
                     painter.drawEllipse(SCALE_FACTOR * QtCore.QPointF(*item[0]), SCALE_FACTOR * item[1],
                                         SCALE_FACTOR * item[1])
         elif (self.mode == RasterMode.RAYTRACE):
-            if self.repaint:
+            print(self.repaintRaytace)
+            if self.repaintRaytace:
                 raster = np.transpose(self.camera.raytrace(self.objs, False), (1, 0, 2)).copy()
                 raster8 = raster.astype(np.uint8, order='C', casting='unsafe')
                 image = QtGui.QImage(raster8.data, raster8.shape[1], raster8.shape[0], QtGui.QImage.Format_RGB888)
@@ -75,7 +76,7 @@ class CubeTeaRasterWidget(QtWidgets.QWidget):
                                    QtCore.QRectF(0, 0, SCALE_FACTOR * self.camera.vdims[0],
                                                  SCALE_FACTOR * self.camera.vdims[1]))
                 self.cache = pixmap
-                self.repaint = False
+                self.repaintRaytace = False
             else:
                 painter.drawPixmap(QtCore.QPointF(0, 0), self.cache,
                                    QtCore.QRectF(0, 0, SCALE_FACTOR * self.camera.vdims[0],
@@ -114,18 +115,18 @@ class CubeTeaRasterWidget(QtWidgets.QWidget):
 
     def toggleRenderMode(self):
         self.mode = RasterMode.FRAME if self.mode == RasterMode.RAYTRACE else RasterMode.RAYTRACE
-        self.repaint = True
+        self.repaintRaytace = True
         self.update()
 
-    def reselect(self, selectIdx):
+    def reselect(self, selectIdx, repaint=True):
+        self.repaintRaytace = repaint
         self.pivotIdx = -1
         self.selectIdx = selectIdx
-        self.repaint = True
+        self.repaintRaytace = repaint
         self.update()
 
 class DoubleValidator(QtGui.QDoubleValidator):
     def validate(self, arg__1, arg__2):
-        print(arg__1, arg__2)
         if (len(arg__1) == 1 and arg__1 == '-'):
             return QtGui.QValidator.Acceptable
         elif (len(arg__1) > 1 and arg__1[0] == '-'):
@@ -660,8 +661,8 @@ class CubeTeaCameraDockWidget(QtWidgets.QDockWidget):
         self.setWidget(self.controls)
         self.show()
 
-    def update_render(self):
-        self.parentWidget().update_render()
+    def update_render(self, repaint=False):
+        self.parentWidget().update_render(repaint)
 
     def get_pivot(self):
         return self.parentWidget().get_pivot()
@@ -838,7 +839,7 @@ class CubeTeaCameraWidget(QtWidgets.QWidget):
                 elif tag2 == "pivot":
                     pivotIdx = self.parentWidget().get_pivot()
                     self.pivot = self.objs[pivotIdx] if pivotIdx != -1 else None
-                    self.parentWidget().update_render()
+                    self.parentWidget().update_render(False)
         return inner_callback
 
     def reset_pivot(self):
@@ -930,7 +931,7 @@ class CubeTeaWidget(QtWidgets.QMainWindow):
     # Signal chains
     def on_obj_entry_clicked(self, idx):
         self.cameraDock.reset_pivot()
-        self.viewport.reselect(idx)
+        self.viewport.reselect(idx, False)
         self.inspectorDock.on_obj_entry_clicked(idx)
         self.hierarchyMenuDock.on_obj_entry_clicked(idx)
         if idx == -1:
@@ -946,8 +947,8 @@ class CubeTeaWidget(QtWidgets.QMainWindow):
         self.hierarchyDock.on_item_name_changed_rev(idx)
         self.autosave()
 
-    def update_render(self):
-        self.viewport.repaint = True
+    def update_render(self, repaint=True):
+        self.viewport.repaint = repaint
         self.viewport.update()
         self.autosave()
 

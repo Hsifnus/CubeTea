@@ -120,7 +120,7 @@ class BaseObject:
 
     # Sets the object's quaternion according to input Euler angles
     def set_euler(self, euler=np.zeros(3)):
-        self.quaternion = self.quaternion + EPSILON * np.zeros(4)
+        self.quaternion = self.quaternion + EPSILON * np.ones(4)
         e = 0.5 * (euler + np.array([180, 0, 180])) / DPR
         self.quaternion[0] = trig_3(e, 0, 0, 0) + trig_3(e, 1, 1, 1)
         self.quaternion[1] = trig_3(e, 1, 0, 0) - trig_3(e, 0, 1, 1)
